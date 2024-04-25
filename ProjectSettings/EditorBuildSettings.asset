@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/IcePass.unity
     guid: 143ab41d7a28cb84897239cade2dce6e
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.adaptiveperformance.google.android.provider_settings: {fileID: 11400000, guid: 52530a2c3f72f014fb9f52686a2db6a8, type: 2}
+    com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: cec220c7ee3e7424495b2e9f990f7de2, type: 2}
+    com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: ecf687254856287489f54443f3d99bfa, type: 2}

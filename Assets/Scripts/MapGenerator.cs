@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class MapGenerator : MonoBehaviour
 {
-    const int INITIAL_CHUNKS = 10;
+    const int INITIAL_CHUNKS = 5;
 
     public static MapGenerator instance;
 
