@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -16,6 +17,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject initialMenu;
     [SerializeField] private GameObject inGameMenu;
     private TextMeshProUGUI highScoreText;
+    private TextMeshProUGUI nameText;
 
     private CanvasGroup levelsPopUpCanvasGroup;
 
@@ -25,7 +27,11 @@ public class GameManager : MonoBehaviour
         instance = this;
         levelsPopUpCanvasGroup = levelsPopUp.GetComponent<CanvasGroup>();
         highScoreText = GameObject.Find("High Score").GetComponent<TextMeshProUGUI>();
+        nameText = GameObject.Find("Name").GetComponent<TextMeshProUGUI>();
         highScoreText.text = $"{Mathf.Round(PlayerPrefsManager.highScore)}m";
+
+        Debug.Log("name as: " + PlayerPrefsManager.username);
+        nameText.text = PlayerPrefsManager.username;
     }
 
     
@@ -43,13 +49,13 @@ public class GameManager : MonoBehaviour
 
     public void GoToLeaderboardScene()
     {
-        SceneManager.LoadScene(1);
+        SceneManager.LoadScene("Leaderboard");
     }
     
     
     public void GoToIcePassScene()
     {
-        SceneManager.LoadScene(2);
+        SceneManager.LoadScene("IcePass");
     }
 
 

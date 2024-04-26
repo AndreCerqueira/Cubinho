@@ -36,9 +36,9 @@ public class IcePassManager : MonoBehaviour
     }
     
 
-    public void ReturnToGameScene() => SceneManager.LoadScene(0);
+    public void ReturnToGameScene() => SceneManager.LoadScene("Game");
 
-    
+
     public void NextHat()
     {
         if (currentPageIndex == items.Count - 1)

@@ -5,6 +5,30 @@ public static class PlayerPrefsManager
 {
     public const int COINS_PER_LEVEL = 10;
 
+    public static string username
+    {
+        get { return PlayerPrefs.GetString("username"); }
+        set { PlayerPrefs.SetString("username", value); }
+    }
+    
+    public static string password
+    {
+        get { return PlayerPrefs.GetString("password"); }
+        set { PlayerPrefs.SetString("password", value); }
+    }
+
+    public static bool isGuest
+    {
+        get { return PlayerPrefs.GetInt("isGuest") == 0 ? false : true; }
+        set { PlayerPrefs.SetInt("isGuest", (value == false) ? 0 : 1); }
+    }
+
+    public static bool rememberMe
+    {
+        get { return PlayerPrefs.GetInt("rememberMe") == 0 ? false : true; }
+        set { PlayerPrefs.SetInt("rememberMe", (value == false) ? 0 : 1); }
+    }
+
     public static int lastLevelLoaded
     {
         get { return PlayerPrefs.GetInt("lastLevelLoaded"); }

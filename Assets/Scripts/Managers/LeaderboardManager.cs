@@ -37,7 +37,7 @@ public class LeaderboardManager : MonoBehaviour
     }
 
     
-    public void ReturnToGameScene() => SceneManager.LoadScene(0);
+    public void ReturnToGameScene() => SceneManager.LoadScene("Game");
 
 
     public void OpenAllTimeHighScoreLeaderboard() => OpenLeaderboard(allTimeHighScoreLeaderboard, allTimeHighScoreButton);
