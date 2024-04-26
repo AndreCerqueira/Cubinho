@@ -5,6 +5,8 @@ public static class PlayerPrefsManager
 {
     public const int COINS_PER_LEVEL = 10;
 
+    public static string getTodayDate => DateTime.Now.ToString("dd-MM-yyyy");
+
     public static string username
     {
         get { return PlayerPrefs.GetString("username"); }
@@ -41,6 +43,12 @@ public static class PlayerPrefsManager
         set { PlayerPrefs.SetFloat("highScore", value); }
     }
 
+    public static float highScoreToday
+    {
+        get { return PlayerPrefs.GetFloat($"highScore-{getTodayDate}"); }
+        set { PlayerPrefs.SetFloat($"highScore-{getTodayDate}", value); }
+    }
+
     public static int hatEquipedId
     {
         get { return PlayerPrefs.GetInt("hatEquipedId"); }
@@ -53,6 +61,16 @@ public static class PlayerPrefsManager
         set 
         { 
             PlayerPrefs.SetInt("coins", value);
+            onCoinAdded?.Invoke(null, EventArgs.Empty);
+        }
+    }
+
+    public static int runCoins
+    {
+        get { return PlayerPrefs.GetInt("runCoins"); }
+        set
+        {
+            PlayerPrefs.SetInt("runCoins", value);
             onCoinAdded?.Invoke(null, EventArgs.Empty);
         }
     }

@@ -1,7 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
+using Unity.Services.Leaderboards;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using Unity.Services.CloudSave;
 
 public class CubinhoMovement : MonoBehaviour
 {
@@ -94,9 +94,22 @@ public class CubinhoMovement : MonoBehaviour
             isCollided = true;
             GameManager.instance.ShowGameOverPopUp();
 
-            // if is not infinite
-            if (PlayerPrefsManager.lastLevelLoaded == 0 && ScoreCounter.instance.GetScore() > PlayerPrefsManager.highScore)
+            if (PlayerPrefsManager.lastLevelLoaded != 0)
+                return;
+
+            // add score
+            AddScore(ScoreCounter.instance.GetScore());
+            
+            if (ScoreCounter.instance.GetScore() > PlayerPrefsManager.highScore) 
                 PlayerPrefsManager.highScore = ScoreCounter.instance.GetScore();
+            
+            if (ScoreCounter.instance.GetScore() > PlayerPrefsManager.highScoreToday)
+                PlayerPrefsManager.highScoreToday = ScoreCounter.instance.GetScore();
+
+            // add coins
+            PlayerPrefsManager.coins += PlayerPrefsManager.runCoins;
+            PlayerPrefsManager.runCoins = 0;
+            SaveCoinsCloud();
         }
     }
 
@@ -115,5 +128,24 @@ public class CubinhoMovement : MonoBehaviour
     private bool IsMobilePlatform()
     {
         return Application.platform == RuntimePlatform.Android || Application.platform == RuntimePlatform.IPhonePlayer;
+    }
+
+    /*
+     ------------------------------------------------------ LEADERBOARD ------------------------------------------------------
+     */
+
+    public async void AddScore(float score)
+    {
+        await LeaderboardsService.Instance.AddPlayerScoreAsync(LeaderboardManager.ALL_TIME_HIGH_LEADERBOARD_ID, score);
+        await LeaderboardsService.Instance.AddPlayerScoreAsync(LeaderboardManager.DAY_BEST_LEADERBOARD_ID, score);
+    }
+
+    public async void SaveCoinsCloud()
+    {
+        var playerData = new Dictionary<string, object>{
+          {"coins", PlayerPrefsManager.coins}
+        };
+        await CloudSaveService.Instance.Data.Player.SaveAsync(playerData);
+        Debug.Log($"Saved data {string.Join(',', playerData)}");
     }
 }

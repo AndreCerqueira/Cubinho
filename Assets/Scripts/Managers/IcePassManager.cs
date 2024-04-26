@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
+using Unity.Services.CloudSave;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -107,5 +108,16 @@ public class IcePassManager : MonoBehaviour
 
         // Refresh page
         ChangePage(currentPageIndex);
+        SaveEquipedHatCloud();
+    }
+
+
+    public async void SaveEquipedHatCloud()
+    {
+        var playerData = new Dictionary<string, object>{
+          {"hatEquipedId", PlayerPrefsManager.hatEquipedId}
+        };
+        await CloudSaveService.Instance.Data.Player.SaveAsync(playerData);
+        Debug.Log($"Saved data {string.Join(',', playerData)}");
     }
 }

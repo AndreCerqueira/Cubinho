@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using Unity.Services.CloudSave;
 
 public class AuthManager : MonoBehaviour
 {
@@ -25,7 +26,7 @@ public class AuthManager : MonoBehaviour
         await UnityServices.InitializeAsync();
         print("Unity Services Initialized");
 
-        // AuthenticationService.Instance.ClearSessionToken();
+        AuthenticationService.Instance.ClearSessionToken();
 
         if (PlayerPrefsManager.rememberMe && AuthenticationService.Instance.SessionTokenExists)
         {
@@ -78,7 +79,9 @@ public class AuthManager : MonoBehaviour
         try
         {
             await AuthenticationService.Instance.SignUpWithUsernamePasswordAsync(username, password);
-            Debug.Log("SignUp is successful.");
+            await AuthenticationService.Instance.UpdatePlayerNameAsync(username);
+            Debug.Log($"SignUp is successful. [Player ID: {AuthenticationService.Instance.PlayerId}]\"");
+            
             GoToGameScene();
         }
         catch (AuthenticationException ex)
@@ -99,7 +102,11 @@ public class AuthManager : MonoBehaviour
         try
         {
             await AuthenticationService.Instance.SignInWithUsernamePasswordAsync(username, password);
-            Debug.Log("SignIn is successful.");
+            Debug.Log($"SignIn is successful. [Player ID: {AuthenticationService.Instance.PlayerId}]\"");
+
+            // load coins, equiped hat and best score and today best score
+            LoadCloudData();
+            
             GoToGameScene();
         }
         catch (AuthenticationException ex)
@@ -127,10 +134,10 @@ public class AuthManager : MonoBehaviour
     }
 
     // change scene to game scene
-    private void GoToGameScene(bool isGuest = false)
+    private async void GoToGameScene(bool isGuest = false)
     {
         if (isGuest)
-            PlayerPrefsManager.username = "guest-" + AuthenticationService.Instance.PlayerId;
+            PlayerPrefsManager.username = await AuthenticationService.Instance.GetPlayerNameAsync(); //"guest-" + AuthenticationService.Instance.PlayerId;
         else
             PlayerPrefsManager.username = username;
 
@@ -142,4 +149,29 @@ public class AuthManager : MonoBehaviour
         SceneManager.LoadScene("Game");
     }
 
+
+    public async void LoadCloudData()
+    {
+        var playerData = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> {
+          "coins", "hatEquipedId"
+        });
+
+        if (playerData.TryGetValue("coins", out var firstKey))
+        {
+            PlayerPrefsManager.coins = firstKey.Value.GetAs<int>();
+        }
+        else
+        {
+            PlayerPrefsManager.coins = 0;
+        }
+
+        if (playerData.TryGetValue("hatEquipedId", out var secondKey))
+        {
+            PlayerPrefsManager.hatEquipedId = secondKey.Value.GetAs<int>();
+        }
+        else
+        {
+            PlayerPrefsManager.hatEquipedId = 0;
+        }
+    }
 }
