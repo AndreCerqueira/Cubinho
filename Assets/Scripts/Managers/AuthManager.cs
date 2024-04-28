@@ -8,6 +8,10 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
 using Unity.Services.CloudSave;
+using UnityEngine.XR;
+using System;
+using Unity.Services.Leaderboards;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class AuthManager : MonoBehaviour
 {
@@ -105,9 +109,10 @@ public class AuthManager : MonoBehaviour
             Debug.Log($"SignIn is successful. [Player ID: {AuthenticationService.Instance.PlayerId}]\"");
 
             // load coins, equiped hat and best score and today best score
-            LoadCloudData();
+            LoadCloudData(() => {
+                GoToGameScene();
+            });
             
-            GoToGameScene();
         }
         catch (AuthenticationException ex)
         {
@@ -150,28 +155,48 @@ public class AuthManager : MonoBehaviour
     }
 
 
-    public async void LoadCloudData()
+    public async void LoadCloudData(Action onComplete)
     {
         var playerData = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> {
           "coins", "hatEquipedId"
         });
 
         if (playerData.TryGetValue("coins", out var firstKey))
-        {
             PlayerPrefsManager.coins = firstKey.Value.GetAs<int>();
-        }
         else
-        {
             PlayerPrefsManager.coins = 0;
-        }
 
         if (playerData.TryGetValue("hatEquipedId", out var secondKey))
-        {
             PlayerPrefsManager.hatEquipedId = secondKey.Value.GetAs<int>();
-        }
         else
-        {
             PlayerPrefsManager.hatEquipedId = 0;
+
+        
+        // get player best score
+        try
+        {
+            var bestScore = await LeaderboardsService.Instance
+                .GetPlayerScoreAsync(LeaderboardManager.ALL_TIME_HIGH_LEADERBOARD_ID);
+            PlayerPrefsManager.highScore = (float)bestScore.Score;
         }
+        catch (Exception)
+        {
+            PlayerPrefsManager.highScore = 0;
+        }
+
+
+        // get player today best score
+        try
+        {
+            var todayBestScore = await LeaderboardsService.Instance
+                .GetPlayerScoreAsync(LeaderboardManager.DAY_BEST_LEADERBOARD_ID);
+            PlayerPrefsManager.highScoreToday = (float)todayBestScore.Score;
+        }
+        catch (Exception)
+        {
+            PlayerPrefsManager.highScoreToday = 0;
+        }
+
+        onComplete.Invoke();
     }
 }

@@ -1,10 +1,13 @@
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Services.Leaderboards;
+using Unity.Services.Leaderboards.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 
 public class LeaderboardManager : MonoBehaviour
@@ -61,8 +64,8 @@ public class LeaderboardManager : MonoBehaviour
 
     public void OpenAllTimeHighScoreLeaderboard() => OpenLeaderboard(allTimeHighScoreButton, GetAllTimeHighScores);
     public void OpenTodayLeaderboard() => OpenLeaderboard(todayButton, GetTodayHighScores);
-
-    public void OpenYesterdayLeaderboard() => OpenLeaderboard(yesterdayButton);
+    public void OpenYesterdayLeaderboard() => OpenLeaderboard(yesterdayButton, GetYesterdayHighScores);
+    
     public void OpenLevelsLeaderboard() => OpenLeaderboard(levelsButton);
     public void OpenTopMedalistsLeaderboard() => OpenLeaderboard(topMedalistsButton);
 
@@ -87,40 +90,11 @@ public class LeaderboardManager : MonoBehaviour
         var scoresResponse =
             await LeaderboardsService.Instance.GetScoresAsync(ALL_TIME_HIGH_LEADERBOARD_ID, new GetScoresOptions { Offset = 0, Limit = 10 });
         Debug.Log(JsonConvert.SerializeObject(scoresResponse));
-        
-        // instantiate a row for each score
-        foreach (var result in scoresResponse.Results)
-        {
-            // remove the # id from the name
-            string name = result.PlayerName;
-            if (result.PlayerName.Contains("#"))
-                name = result.PlayerName.Substring(0, result.PlayerName.LastIndexOf("#"));
 
-            var row = Instantiate(metersRow, leaderboardContent.transform);
-
-            row.GetComponent<Image>().color = result.Rank switch
-            {
-                0 => firstColor,
-                1 => secondColor,
-                2 => thirdColor,
-                _ => result.Rank % 2 == 0 ? defaultEvenColor : defaultOddColor,
-            };
-
-            Image rankIcon = row.transform.Find("Position").GetComponent<Image>();
-            rankIcon.sprite = result.Rank switch
-            {
-                0 => firstRank,
-                1 => secondRank,
-                2 => thirdRank,
-                _ => defaultRank,
-            };
-            
-            row.transform.Find("Position/Text").GetComponent<TextMeshProUGUI>().text = (result.Rank + 1).ToString();
-            row.transform.Find("Player name").GetComponent<TextMeshProUGUI>().text = name;
-            row.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = Mathf.RoundToInt((float)result.Score).ToString() + "m";
-        }
+        BuildDefaultLeaderboard(scoresResponse.Results);
     }
 
+    
     public async void GetTodayHighScores()
     {
         ClearLeaderboard();
@@ -129,8 +103,42 @@ public class LeaderboardManager : MonoBehaviour
             await LeaderboardsService.Instance.GetScoresAsync(DAY_BEST_LEADERBOARD_ID, new GetScoresOptions { Offset = 0, Limit = 10 });
         Debug.Log(JsonConvert.SerializeObject(scoresResponse));
 
-        // instantiate a row for each score
-        foreach (var result in scoresResponse.Results)
+        BuildDefaultLeaderboard(scoresResponse.Results);
+    }
+
+
+    public async void GetYesterdayHighScores()
+    {
+        ClearLeaderboard();
+
+        var versionsResponse = await LeaderboardsService.Instance
+            .GetVersionsAsync(
+                DAY_BEST_LEADERBOARD_ID,
+                new GetVersionsOptions { Limit = 1 });
+
+        var versionId = versionsResponse.Results[0].Id;
+
+        var scoresResponse = await LeaderboardsService.Instance
+        .GetVersionScoresAsync(DAY_BEST_LEADERBOARD_ID, versionId, new GetVersionScoresOptions { Offset = 0, Limit = 10 });
+        
+        Debug.Log(JsonConvert.SerializeObject(scoresResponse));
+
+        BuildDefaultLeaderboard(scoresResponse.Results);
+    }
+    
+
+    public void ClearLeaderboard()
+    {
+        foreach (Transform child in leaderboardContent.transform)
+        {
+            Destroy(child.gameObject);
+        }
+    }
+
+
+    public void BuildDefaultLeaderboard(List<LeaderboardEntry> results)
+    {
+        foreach (var result in results)
         {
             // remove the # id from the name
             string name = result.PlayerName;
@@ -159,15 +167,6 @@ public class LeaderboardManager : MonoBehaviour
             row.transform.Find("Position/Text").GetComponent<TextMeshProUGUI>().text = (result.Rank + 1).ToString();
             row.transform.Find("Player name").GetComponent<TextMeshProUGUI>().text = name;
             row.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = Mathf.RoundToInt((float)result.Score).ToString() + "m";
-        }
-    }
-
-    
-    public void ClearLeaderboard()
-    {
-        foreach (Transform child in leaderboardContent.transform)
-        {
-            Destroy(child.gameObject);
         }
     }
 }
