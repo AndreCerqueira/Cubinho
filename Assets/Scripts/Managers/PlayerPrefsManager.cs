@@ -18,6 +18,12 @@ public static class PlayerPrefsManager
         get { return PlayerPrefs.GetString("password"); }
         set { PlayerPrefs.SetString("password", value); }
     }
+    
+    public static int qualitySettings
+    {
+        get { return PlayerPrefs.GetInt("qualitySettings"); }
+        set { PlayerPrefs.SetInt("qualitySettings", value); }
+    }
 
     public static bool isGuest
     {

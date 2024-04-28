@@ -30,7 +30,7 @@ public class AuthManager : MonoBehaviour
         await UnityServices.InitializeAsync();
         print("Unity Services Initialized");
 
-        AuthenticationService.Instance.ClearSessionToken();
+        //AuthenticationService.Instance.ClearSessionToken();
 
         if (PlayerPrefsManager.rememberMe && AuthenticationService.Instance.SessionTokenExists)
         {

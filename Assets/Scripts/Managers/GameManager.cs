@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using TMPro;
+using Unity.Services.Authentication;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -13,6 +14,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Image levelsButton;
     
     [SerializeField] private GameObject gameOverPopUp;
+    [SerializeField] private GameObject settingsPopUp;
     [SerializeField] private GameObject levelsPopUp;
     [SerializeField] private GameObject initialMenu;
     [SerializeField] private GameObject inGameMenu;
@@ -21,7 +23,12 @@ public class GameManager : MonoBehaviour
 
     private CanvasGroup levelsPopUpCanvasGroup;
 
-    
+    [Header("Game Over Scores")]
+    [SerializeField] private TextMeshProUGUI gameOverHighScore;
+    [SerializeField] private TextMeshProUGUI gameOverCurrentScore;
+    [SerializeField] private TextMeshProUGUI gameOverTodayHighScore;
+
+
     void Start()
     {
         instance = this;
@@ -32,15 +39,21 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("name as: " + PlayerPrefsManager.username);
         nameText.text = PlayerPrefsManager.username;
+
+        var userId = AuthenticationService.Instance.PlayerId;
+        GameObject.Find("UserID/Text").GetComponent<TextMeshProUGUI>().text = userId;
+
     }
 
-    
-    void Update()
+
+    public void PopulateGameOverScreen(float currentScore)
     {
-
+        gameOverCurrentScore.text = Mathf.Round(currentScore) + "m";
+        gameOverTodayHighScore.text = Mathf.Round(PlayerPrefsManager.highScoreToday) + "m";
+        gameOverHighScore.text = Mathf.Round(PlayerPrefsManager.highScore) + "m";
     }
 
-    
+
     public void RestartGame()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -59,8 +72,10 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public void ShowGameOverPopUp() =>
+    public void ShowGameOverPopUp()
+    {
         StartCoroutine(DoFadeIn(gameOverPopUp.GetComponent<CanvasGroup>()));
+    }
 
 
     public void ShowLevelsPopUp() 
@@ -91,7 +106,19 @@ public class GameManager : MonoBehaviour
             StartCoroutine(DoFadeIn(inGameMenu.GetComponent<CanvasGroup>()));
     }
 
+
+    public void ShowSettingsMenu()
+    {
+        StartCoroutine(DoFadeIn(settingsPopUp.GetComponent<CanvasGroup>()));
+    }
+
     
+    public void HideSettingsMenu()
+    {
+        StartCoroutine(DoFadeOut(settingsPopUp.GetComponent<CanvasGroup>()));
+    }
+
+
     public void MarkButtonAsSelected(Image button)
     {
         button.sprite = selectedButtonSprite;
@@ -101,6 +128,14 @@ public class GameManager : MonoBehaviour
     public void MarkButtonAsUnselected(Image button)
     {
         button.sprite = unselectedButtonSprite;
+    }
+
+    
+    public void LogOut()
+    {
+        AuthenticationService.Instance.SignOut(true);
+        AuthenticationService.Instance.ClearSessionToken();
+        SceneManager.LoadScene("InitialMenu");
     }
 
 

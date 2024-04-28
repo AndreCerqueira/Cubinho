@@ -14,7 +14,11 @@ public class ClickToStart : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) 
+            || Input.GetKeyDown(KeyCode.A) 
+            || Input.GetKeyDown(KeyCode.D) 
+            || Input.GetKeyDown(KeyCode.LeftArrow) 
+            || Input.GetKeyDown(KeyCode.RightArrow))
             Clicked();
     }
 

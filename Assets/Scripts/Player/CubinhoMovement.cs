@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Unity.Services.Leaderboards;
 using UnityEngine;
 using Unity.Services.CloudSave;
+using System.Threading.Tasks;
 
 public class CubinhoMovement : MonoBehaviour
 {
@@ -11,6 +12,7 @@ public class CubinhoMovement : MonoBehaviour
     public float slidingSpeed, turningSpeed;
     private float targetX;
     private bool isCollided;
+    private bool isReadyToRestart;
     public bool isPlayPressed;
     private bool canSlide;
 
@@ -31,7 +33,7 @@ public class CubinhoMovement : MonoBehaviour
 
         if (isCollided)
         {
-            if (Input.anyKeyDown)
+            if (Input.anyKeyDown && isReadyToRestart)
                 GameManager.instance.RestartGame();
             return;
         }
@@ -92,6 +94,7 @@ public class CubinhoMovement : MonoBehaviour
             Debug.Log("Collided with obstacle");
 
             isCollided = true;
+            isReadyToRestart = true;
             GameManager.instance.ShowGameOverPopUp();
 
             if (PlayerPrefsManager.lastLevelLoaded != 0)
@@ -106,10 +109,14 @@ public class CubinhoMovement : MonoBehaviour
             if (ScoreCounter.instance.GetScore() > PlayerPrefsManager.highScoreToday)
                 PlayerPrefsManager.highScoreToday = ScoreCounter.instance.GetScore();
 
+            GameManager.instance.PopulateGameOverScreen(ScoreCounter.instance.GetScore());
+            
             // add coins
             PlayerPrefsManager.coins += PlayerPrefsManager.runCoins;
             PlayerPrefsManager.runCoins = 0;
             SaveCoinsCloud();
+
+            //Task.Delay(3000).ContinueWith(t => isReadyToRestart = true);
         }
     }
 

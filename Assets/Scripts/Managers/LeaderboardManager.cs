@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using TMPro;
 using Unity.Services.Leaderboards;
@@ -33,6 +34,7 @@ public class LeaderboardManager : MonoBehaviour
 
     [Header("Rows")]
     [SerializeField] private GameObject metersRow;
+    [SerializeField] private GameObject medalsRow;
 
     [Header("Sprites")]
     [SerializeField] private Sprite selectedButtonSprite;
@@ -48,6 +50,17 @@ public class LeaderboardManager : MonoBehaviour
     [SerializeField] private Button yesterdayButton;
     [SerializeField] private Button levelsButton;
     [SerializeField] private Button topMedalistsButton;
+
+    
+    public class PlayerMedals
+    {
+        public string PlayerId { get; set; }
+        public string PlayerName { get; set; }
+        public int Points { get; set; }
+        public int GoldCount { get; set; }
+        public int SilverCount { get; set; }
+        public int BronzeCount { get; set; }
+    }
 
 
     public void Start()
@@ -67,7 +80,7 @@ public class LeaderboardManager : MonoBehaviour
     public void OpenYesterdayLeaderboard() => OpenLeaderboard(yesterdayButton, GetYesterdayHighScores);
     
     public void OpenLevelsLeaderboard() => OpenLeaderboard(levelsButton);
-    public void OpenTopMedalistsLeaderboard() => OpenLeaderboard(topMedalistsButton);
+    public void OpenTopMedalistsLeaderboard() => OpenLeaderboard(topMedalistsButton, GetBestMedalists);
 
 
     public void OpenLeaderboard(Button button, Action onLeaderboardOpened = null)
@@ -125,7 +138,92 @@ public class LeaderboardManager : MonoBehaviour
 
         BuildDefaultLeaderboard(scoresResponse.Results);
     }
-    
+
+
+    public async void GetBestMedalists()
+    {
+        ClearLeaderboard();
+            
+        var allVersions = await LeaderboardsService.Instance.GetVersionsAsync(DAY_BEST_LEADERBOARD_ID);
+
+        var playerScores = new List<PlayerMedals>();
+
+        // Iterar por todas as versões do leaderboard
+        foreach (var version in allVersions.Results)
+        {
+            var scoresResponse = await LeaderboardsService.Instance
+                .GetVersionScoresAsync(DAY_BEST_LEADERBOARD_ID, version.Id, new GetVersionScoresOptions { Offset = 0, Limit = 10 });
+
+            // Atribuir pontos com base no ranking
+            for (int i = 0; i < scoresResponse.Results.Count; i++)
+            {
+                int points = 0;
+                points = i switch
+                {
+                    0 => 3,
+                    1 => 2,
+                    2 => 1,
+                    _ => 0,
+                };
+                var playerId = scoresResponse.Results[i].PlayerId;
+                var playerName = scoresResponse.Results[i].PlayerName;
+                var playerScore = playerScores.FirstOrDefault(p => p.PlayerId == playerId);
+
+                if (playerScore != null)
+                {
+                    playerScore.Points += points;
+
+                    // Atualizar a contagem de medalhas
+                    switch (i)
+                    {
+                        case 0:
+                            playerScore.GoldCount++;
+                            break;
+                        case 1:
+                            playerScore.SilverCount++;
+                            break;
+                        case 2:
+                            playerScore.BronzeCount++;
+                            break;
+                    }
+                }
+                else
+                {
+                    var newPlayerScore = new PlayerMedals
+                    {
+                        PlayerId = playerId,
+                        PlayerName = playerName,
+                        Points = points
+                    };
+
+                    // Definir a contagem de medalhas
+                    switch (i)
+                    {
+                        case 0:
+                            newPlayerScore.GoldCount = 1;
+                            break;
+                        case 1:
+                            newPlayerScore.SilverCount = 1;
+                            break;
+                        case 2:
+                            newPlayerScore.BronzeCount = 1;
+                            break;
+                    }
+
+                    playerScores.Add(newPlayerScore);
+                }
+            }
+        }
+
+        // Classificar jogadores com base em seus pontos
+        var sortedPlayerScores = playerScores.OrderByDescending(p => p.Points);
+
+        // Selecionar os 10 melhores jogadores
+        List<PlayerMedals> topPlayers = sortedPlayerScores.Take(10).ToList();
+
+        BuildMedalistsLeaderboard(topPlayers);
+    }
+
 
     public void ClearLeaderboard()
     {
@@ -167,6 +265,60 @@ public class LeaderboardManager : MonoBehaviour
             row.transform.Find("Position/Text").GetComponent<TextMeshProUGUI>().text = (result.Rank + 1).ToString();
             row.transform.Find("Player name").GetComponent<TextMeshProUGUI>().text = name;
             row.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = Mathf.RoundToInt((float)result.Score).ToString() + "m";
+        }
+    }
+
+    public void BuildMedalistsLeaderboard(List<PlayerMedals> results)
+    {
+        var rank = 0;
+        foreach (var result in results)
+        {
+            // remove the # id from the name
+            string name = result.PlayerName;
+            if (result.PlayerName.Contains("#"))
+                name = result.PlayerName.Substring(0, result.PlayerName.LastIndexOf("#"));
+
+            var row = Instantiate(medalsRow, leaderboardContent.transform);
+
+            row.GetComponent<Image>().color = rank switch
+            {
+                0 => firstColor,
+                1 => secondColor,
+                2 => thirdColor,
+                _ => rank % 2 == 0 ? defaultEvenColor : defaultOddColor,
+            };
+
+            Image rankIcon = row.transform.Find("Position").GetComponent<Image>();
+            rankIcon.sprite = rank switch
+            {
+                0 => firstRank,
+                1 => secondRank,
+                2 => thirdRank,
+                _ => defaultRank,
+            };
+
+            row.transform.Find("Position/Text").GetComponent<TextMeshProUGUI>().text = (rank + 1).ToString();
+            row.transform.Find("Player name").GetComponent<TextMeshProUGUI>().text = name;
+
+            GameObject goldCounter = row.transform.Find("Score/Content/Golds").gameObject;
+            if (result.GoldCount > 0)
+                goldCounter.transform.Find("Text").GetComponent<TextMeshProUGUI>().text = "x" + result.GoldCount;
+            else
+                goldCounter.SetActive(false);
+
+            GameObject silverCounter = row.transform.Find("Score/Content/Silvers").gameObject;
+            if (result.SilverCount > 0)
+                silverCounter.transform.Find("Text").GetComponent<TextMeshProUGUI>().text = "x" + result.SilverCount;
+            else
+                silverCounter.SetActive(false);
+
+            GameObject bronzeCounter = row.transform.Find("Score/Content/Bronzes").gameObject;
+            if (result.BronzeCount > 0)
+                bronzeCounter.transform.Find("Text").GetComponent<TextMeshProUGUI>().text = "x" + result.BronzeCount;
+            else
+                bronzeCounter.SetActive(false);
+
+            rank++;
         }
     }
 }
