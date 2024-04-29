@@ -15,7 +15,7 @@ MonoBehaviour:
   itemId: 3
   name: Migui's Cap
   prefab: {fileID: 4923519398612748926, guid: e3bedf1126c85dd428766788dd8ebdb0, type: 3}
-  level: 20
+  level: 10
   isPremium: 0
   passId: 0
   color: 7

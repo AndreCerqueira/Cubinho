@@ -158,7 +158,7 @@ public class AuthManager : MonoBehaviour
     public async void LoadCloudData(Action onComplete)
     {
         var playerData = await CloudSaveService.Instance.Data.Player.LoadAsync(new HashSet<string> {
-          "coins", "hatEquipedId"
+          "coins", "hatEquipedId", "level-1", "level-2", "level-3"
         });
 
         if (playerData.TryGetValue("coins", out var firstKey))
@@ -171,7 +171,21 @@ public class AuthManager : MonoBehaviour
         else
             PlayerPrefsManager.hatEquipedId = 0;
 
+        if (playerData.TryGetValue("level-1", out var level1Key))
+            PlayerPrefsManager.level1Completed = level1Key.Value.GetAs<int>();
+        else
+            PlayerPrefsManager.level1Completed = 0;
         
+        if (playerData.TryGetValue("level-2", out var level2Key))
+            PlayerPrefsManager.level2Completed = level2Key.Value.GetAs<int>();
+        else
+            PlayerPrefsManager.level2Completed = 0;
+
+        if (playerData.TryGetValue("level-3", out var level3Key))
+            PlayerPrefsManager.level3Completed = level3Key.Value.GetAs<int>();
+        else
+            PlayerPrefsManager.level3Completed = 0;
+
         // get player best score
         try
         {

@@ -13,8 +13,10 @@ using UnityEngine.UI;
 
 public class LeaderboardManager : MonoBehaviour
 {
+    public static int LEADERBOARD_LIMIT = 10;
     public static string ALL_TIME_HIGH_LEADERBOARD_ID = "1";
     public static string DAY_BEST_LEADERBOARD_ID = "2";
+    public static string LEVELS_LEADERBOARD_ID = "3";
 
     // Variables
     private Button currentActiveButton;
@@ -35,6 +37,7 @@ public class LeaderboardManager : MonoBehaviour
     [Header("Rows")]
     [SerializeField] private GameObject metersRow;
     [SerializeField] private GameObject medalsRow;
+    [SerializeField] private GameObject levelsRow;
 
     [Header("Sprites")]
     [SerializeField] private Sprite selectedButtonSprite;
@@ -79,7 +82,7 @@ public class LeaderboardManager : MonoBehaviour
     public void OpenTodayLeaderboard() => OpenLeaderboard(todayButton, GetTodayHighScores);
     public void OpenYesterdayLeaderboard() => OpenLeaderboard(yesterdayButton, GetYesterdayHighScores);
     
-    public void OpenLevelsLeaderboard() => OpenLeaderboard(levelsButton);
+    public void OpenLevelsLeaderboard() => OpenLeaderboard(levelsButton, GetLevelsScores);
     public void OpenTopMedalistsLeaderboard() => OpenLeaderboard(topMedalistsButton, GetBestMedalists);
 
 
@@ -101,10 +104,22 @@ public class LeaderboardManager : MonoBehaviour
         ClearLeaderboard();
 
         var scoresResponse =
-            await LeaderboardsService.Instance.GetScoresAsync(ALL_TIME_HIGH_LEADERBOARD_ID, new GetScoresOptions { Offset = 0, Limit = 10 });
+            await LeaderboardsService.Instance.GetScoresAsync(ALL_TIME_HIGH_LEADERBOARD_ID, new GetScoresOptions { Offset = 0, Limit = LEADERBOARD_LIMIT });
         Debug.Log(JsonConvert.SerializeObject(scoresResponse));
 
         BuildDefaultLeaderboard(scoresResponse.Results);
+    }
+
+
+    public async void GetLevelsScores()
+    {
+        ClearLeaderboard();
+
+        var scoresResponse =
+            await LeaderboardsService.Instance.GetScoresAsync(LEVELS_LEADERBOARD_ID, new GetScoresOptions { Offset = 0, Limit = LEADERBOARD_LIMIT });
+        Debug.Log(JsonConvert.SerializeObject(scoresResponse));
+
+        BuildLevelsLeaderboard(scoresResponse.Results);
     }
 
     
@@ -113,7 +128,7 @@ public class LeaderboardManager : MonoBehaviour
         ClearLeaderboard();
         
         var scoresResponse =
-            await LeaderboardsService.Instance.GetScoresAsync(DAY_BEST_LEADERBOARD_ID, new GetScoresOptions { Offset = 0, Limit = 10 });
+            await LeaderboardsService.Instance.GetScoresAsync(DAY_BEST_LEADERBOARD_ID, new GetScoresOptions { Offset = 0, Limit = LEADERBOARD_LIMIT });
         Debug.Log(JsonConvert.SerializeObject(scoresResponse));
 
         BuildDefaultLeaderboard(scoresResponse.Results);
@@ -132,7 +147,7 @@ public class LeaderboardManager : MonoBehaviour
         var versionId = versionsResponse.Results[0].Id;
 
         var scoresResponse = await LeaderboardsService.Instance
-        .GetVersionScoresAsync(DAY_BEST_LEADERBOARD_ID, versionId, new GetVersionScoresOptions { Offset = 0, Limit = 10 });
+        .GetVersionScoresAsync(DAY_BEST_LEADERBOARD_ID, versionId, new GetVersionScoresOptions { Offset = 0, Limit = LEADERBOARD_LIMIT });
         
         Debug.Log(JsonConvert.SerializeObject(scoresResponse));
 
@@ -152,7 +167,7 @@ public class LeaderboardManager : MonoBehaviour
         foreach (var version in allVersions.Results)
         {
             var scoresResponse = await LeaderboardsService.Instance
-                .GetVersionScoresAsync(DAY_BEST_LEADERBOARD_ID, version.Id, new GetVersionScoresOptions { Offset = 0, Limit = 10 });
+                .GetVersionScoresAsync(DAY_BEST_LEADERBOARD_ID, version.Id); // , new GetVersionScoresOptions { Offset = 0, Limit = LEADERBOARD_LIMIT }
 
             // Atribuir pontos com base no ranking
             for (int i = 0; i < scoresResponse.Results.Count; i++)
@@ -219,7 +234,7 @@ public class LeaderboardManager : MonoBehaviour
         var sortedPlayerScores = playerScores.OrderByDescending(p => p.Points);
 
         // Selecionar os 10 melhores jogadores
-        List<PlayerMedals> topPlayers = sortedPlayerScores.Take(10).ToList();
+        List<PlayerMedals> topPlayers = sortedPlayerScores.Take(LEADERBOARD_LIMIT).ToList();
 
         BuildMedalistsLeaderboard(topPlayers);
     }
@@ -265,6 +280,42 @@ public class LeaderboardManager : MonoBehaviour
             row.transform.Find("Position/Text").GetComponent<TextMeshProUGUI>().text = (result.Rank + 1).ToString();
             row.transform.Find("Player name").GetComponent<TextMeshProUGUI>().text = name;
             row.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = Mathf.RoundToInt((float)result.Score).ToString() + "m";
+        }
+    }
+
+    public void BuildLevelsLeaderboard(List<LeaderboardEntry> results)
+    {
+        foreach (var result in results)
+        {
+            // remove the # id from the name
+            string name = result.PlayerName;
+            if (result.PlayerName.Contains("#"))
+                name = result.PlayerName.Substring(0, result.PlayerName.LastIndexOf("#"));
+
+            var row = Instantiate(levelsRow, leaderboardContent.transform);
+
+            row.GetComponent<Image>().color = result.Rank switch
+            {
+                0 => firstColor,
+                1 => secondColor,
+                2 => thirdColor,
+                _ => result.Rank % 2 == 0 ? defaultEvenColor : defaultOddColor,
+            };
+
+            Image rankIcon = row.transform.Find("Position").GetComponent<Image>();
+            rankIcon.sprite = result.Rank switch
+            {
+                0 => firstRank,
+                1 => secondRank,
+                2 => thirdRank,
+                _ => defaultRank,
+            };
+
+            row.transform.Find("Position/Text").GetComponent<TextMeshProUGUI>().text = (result.Rank + 1).ToString();
+            row.transform.Find("Player name").GetComponent<TextMeshProUGUI>().text = name;
+            
+            int level = Mathf.FloorToInt((float)(result.Score / PlayerPrefsManager.COINS_PER_LEVEL)) + 1;
+            row.transform.Find("Level/Text").GetComponent<TextMeshProUGUI>().text = level.ToString();
         }
     }
 

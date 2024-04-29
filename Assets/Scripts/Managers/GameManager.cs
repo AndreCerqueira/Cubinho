@@ -14,6 +14,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Image levelsButton;
     
     [SerializeField] private GameObject gameOverPopUp;
+    [SerializeField] private GameObject completeLevelPopUp;
+    [SerializeField] private TextMeshProUGUI levelCompletedLabel;
     [SerializeField] private GameObject settingsPopUp;
     [SerializeField] private GameObject levelsPopUp;
     [SerializeField] private GameObject initialMenu;
@@ -27,6 +29,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI gameOverHighScore;
     [SerializeField] private TextMeshProUGUI gameOverCurrentScore;
     [SerializeField] private TextMeshProUGUI gameOverTodayHighScore;
+
+    [Header("Level Buttons")]
+    private Color CLEARED_COLOR = new Color(206f / 255f, 255f / 255f, 206f / 255f);
+    [SerializeField] private Image level1Button;
+    [SerializeField] private Image level2Button;
+    [SerializeField] private Image level3Button;
 
 
     void Start()
@@ -42,6 +50,10 @@ public class GameManager : MonoBehaviour
 
         var userId = AuthenticationService.Instance.PlayerId;
         GameObject.Find("UserID/Text").GetComponent<TextMeshProUGUI>().text = userId;
+        
+        if (PlayerPrefsManager.level1Completed == 1) level1Button.color = CLEARED_COLOR;
+        if (PlayerPrefsManager.level2Completed == 1) level2Button.color = CLEARED_COLOR;
+        if (PlayerPrefsManager.level3Completed == 1) level3Button.color = CLEARED_COLOR;
 
     }
 
@@ -75,6 +87,13 @@ public class GameManager : MonoBehaviour
     public void ShowGameOverPopUp()
     {
         StartCoroutine(DoFadeIn(gameOverPopUp.GetComponent<CanvasGroup>()));
+    }
+
+    
+    public void ShowCompleteLevelPopUp()
+    {
+        levelCompletedLabel.text = PlayerPrefsManager.lastLevelLoaded.ToString();
+        StartCoroutine(DoFadeIn(completeLevelPopUp.GetComponent<CanvasGroup>()));
     }
 
 

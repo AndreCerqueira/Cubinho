@@ -3,6 +3,7 @@ using Unity.Services.Leaderboards;
 using UnityEngine;
 using Unity.Services.CloudSave;
 using System.Threading.Tasks;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class CubinhoMovement : MonoBehaviour
 {
@@ -154,5 +155,34 @@ public class CubinhoMovement : MonoBehaviour
         };
         await CloudSaveService.Instance.Data.Player.SaveAsync(playerData);
         Debug.Log($"Saved data {string.Join(',', playerData)}");
+
+        await LeaderboardsService.Instance.AddPlayerScoreAsync(LeaderboardManager.LEVELS_LEADERBOARD_ID, PlayerPrefsManager.coins);
+    }
+
+    public async void CompleteLevel()
+    {
+        isCollided = true;
+        isReadyToRestart = true;
+        GameManager.instance.ShowCompleteLevelPopUp();
+
+        int currentLevel = PlayerPrefsManager.lastLevelLoaded;
+        var playerData = new Dictionary<string, object>{
+          {"level-"+currentLevel, 1}
+        };
+
+        switch (currentLevel)
+        {
+            case 1:
+                PlayerPrefsManager.level1Completed = 1;
+                break;
+            case 2:
+                PlayerPrefsManager.level2Completed = 1;
+                break;
+            case 3:
+                PlayerPrefsManager.level3Completed = 1;
+                break;
+        }
+
+        await CloudSaveService.Instance.Data.Player.SaveAsync(playerData);
     }
 }

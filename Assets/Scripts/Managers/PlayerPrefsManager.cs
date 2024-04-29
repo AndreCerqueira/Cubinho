@@ -60,6 +60,24 @@ public static class PlayerPrefsManager
         get { return PlayerPrefs.GetInt("hatEquipedId"); }
         set { PlayerPrefs.SetInt("hatEquipedId", value); }
     }
+    
+    public static int level1Completed
+    {
+        get { return PlayerPrefs.GetInt("level-1"); }
+        set { PlayerPrefs.SetInt("level-1", value); }
+    }
+
+    public static int level2Completed
+    {
+        get { return PlayerPrefs.GetInt("level-2"); }
+        set { PlayerPrefs.SetInt("level-2", value); }
+    }
+    
+    public static int level3Completed
+    {
+        get { return PlayerPrefs.GetInt("level-3"); }
+        set { PlayerPrefs.SetInt("level-3", value); }
+    }
 
     public static int coins
     {

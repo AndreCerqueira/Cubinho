@@ -7,6 +7,7 @@ TagManager:
   - Obstacle
   - Chunk
   - Ground
+  - Meta
   layers:
   - Default
   - TransparentFX
