@@ -6,6 +6,7 @@ public class Chunk : MonoBehaviour
 {
     public Difficulty difficulty;
     public float distanceToNextChunkZ;
+    public bool isAfter600m;
 
     // Start is called before the first frame update
     void Start()

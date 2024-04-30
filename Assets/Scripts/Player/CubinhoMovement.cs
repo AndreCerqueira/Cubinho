@@ -66,12 +66,12 @@ public class CubinhoMovement : MonoBehaviour
         else
         {
             // Use keyboard input for non-mobile platforms
-            if (Input.GetKey(KeyCode.A)) 
+            if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
             { 
                 targetX += (transform.right * Time.deltaTime * turningSpeed).x;
                 direction = 1;
             }
-            if (Input.GetKey(KeyCode.D))
+            if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
             {
                 targetX -= (transform.right * Time.deltaTime * turningSpeed).x;
                 direction = 2;
@@ -123,6 +123,10 @@ public class CubinhoMovement : MonoBehaviour
 
     public void IncrementSpeed()
     {
+        // if pass 200m dont increment
+        if (ScoreCounter.instance.GetScore() > 2000)
+            return;
+
         slidingSpeed += 0.5f;
         turningSpeed += 0.5f;
     }

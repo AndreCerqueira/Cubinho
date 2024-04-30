@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -28,17 +29,19 @@ public class MapGenerator : MonoBehaviour
     public void GenerateChunk()
     {
         Difficulty nextChunkDifficulty = GetNextChunkDifficulty();
+        float currentScore = ScoreCounter.instance.GetScore();
 
         List<int> validChunkIndices = new List<int>();
         for (int i = 0; i < chunkPrefabs.Length; i++)
         {
             if (chunkPrefabs[i].GetComponent<Chunk>().difficulty == nextChunkDifficulty)
             {
-                validChunkIndices.Add(i);
+                if (!chunkPrefabs[i].GetComponent<Chunk>().isAfter600m || (chunkPrefabs[i].GetComponent<Chunk>().isAfter600m && currentScore >= 600))
+                    validChunkIndices.Add(i);
             }
         }
-
-        int randomIndex = Random.Range(0, validChunkIndices.Count);
+        
+        int randomIndex = UnityEngine.Random.Range(0, validChunkIndices.Count);
         GameObject chunk = Instantiate(chunkPrefabs[validChunkIndices[randomIndex]], transform);
         chunk.transform.SetParent(chunkContainer);
 
@@ -56,7 +59,55 @@ public class MapGenerator : MonoBehaviour
         lastChunkZ = chunk.transform.position.z;
     }
 
-    
+
+    //public void GenerateChunk()
+    //{
+    //    Difficulty nextChunkDifficulty = GetNextChunkDifficulty();
+
+    //    List<int> validChunkIndices = new List<int>();
+    //    for (int i = 0; i < chunkPrefabs.Length; i++)
+    //    {
+    //        if (chunkPrefabs[i].GetComponent<Chunk>().difficulty == nextChunkDifficulty)
+    //        {
+    //            validChunkIndices.Add(i);
+    //        }
+    //    }
+
+    //    int randomIndex;
+    //    GameObject chunk;
+
+    //    // Se não houver índices válidos nesta lista, procuramos em outra até encontrar um índice válido
+    //    while (validChunkIndices.Count == 0)
+    //    {
+    //        nextChunkDifficulty = (Difficulty)(((int)nextChunkDifficulty + 1) % Enum.GetNames(typeof(Difficulty)).Length);
+    //        for (int i = 0; i < chunkPrefabs.Length; i++)
+    //        {
+    //            if (chunkPrefabs[i].GetComponent<Chunk>().difficulty == nextChunkDifficulty)
+    //            {
+    //                validChunkIndices.Add(i);
+    //            }
+    //        }
+    //    }
+
+    //    randomIndex = UnityEngine.Random.Range(0, validChunkIndices.Count);
+    //    chunk = Instantiate(chunkPrefabs[validChunkIndices[randomIndex]], transform);
+    //    chunk.transform.SetParent(chunkContainer);
+
+    //    float nextChunkDistanceZ = chunk.GetComponent<Chunk>().distanceToNextChunkZ;
+
+    //    if (lastChunkZ == 0)
+    //        lastChunkZ = chunk.transform.position.z - nextChunkDistanceZ;
+
+    //    chunk.transform.position = new Vector3(
+    //        chunk.transform.position.x,
+    //        chunk.transform.position.y,
+    //        lastChunkZ + nextChunkDistanceZ
+    //        );
+
+    //    lastChunkZ = chunk.transform.position.z;
+    //}
+
+
     public void GenerateChunk(GameObject chunkPrefab)
     {
         GameObject chunk = Instantiate(chunkPrefab, transform);
@@ -66,7 +117,7 @@ public class MapGenerator : MonoBehaviour
 
     private Difficulty GetNextChunkDifficulty()
     {
-        float randomValue = Random.value;
+        float randomValue = UnityEngine.Random.value;
         float easySpawnChance = Difficulty.Easy.GetSpawnChance();
         float mediumSpawnChance = Difficulty.Medium.GetSpawnChance();
         float hardSpawnChance = Difficulty.Hard.GetSpawnChance();
