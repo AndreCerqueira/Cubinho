@@ -89,6 +89,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   difficulty: 0
   distanceToNextChunkZ: 29.6
+  isAfter600m: 0
 --- !u!65 &2174874692121873517
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -950,7 +951,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8229620091564457217, guid: d7169ccf679c21547ba39918d40f29be, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2.5100007
+      value: -2.607
       objectReference: {fileID: 0}
     - target: {fileID: 8229620091564457217, guid: d7169ccf679c21547ba39918d40f29be, type: 3}
       propertyPath: m_LocalRotation.w

@@ -42,6 +42,7 @@ public class CubinhoMovement : MonoBehaviour
         // Move forward non stop
         transform.position -= transform.forward * Time.deltaTime * slidingSpeed;
         int direction = 0;
+        float newTurningSpeed = turningSpeed < 15 ? 15 : turningSpeed;
 
         // Calculate target position for left and right movement based on input type
         if (IsMobilePlatform())
@@ -52,13 +53,13 @@ public class CubinhoMovement : MonoBehaviour
                 if (touch.position.x < Screen.width / 2)
                 {
                     // Move right if touch is on the left half of the screen
-                    targetX += (transform.right * Time.deltaTime * turningSpeed).x;
+                    targetX += (transform.right * Time.deltaTime * newTurningSpeed).x;
                     direction = 1;
                 }
                 else
                 {
                     // Move left if touch is on the right half of the screen
-                    targetX -= (transform.right * Time.deltaTime * turningSpeed).x;
+                    targetX -= (transform.right * Time.deltaTime * newTurningSpeed).x;
                     direction = 2;
                 }
             }
@@ -68,12 +69,12 @@ public class CubinhoMovement : MonoBehaviour
             // Use keyboard input for non-mobile platforms
             if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
             { 
-                targetX += (transform.right * Time.deltaTime * turningSpeed).x;
+                targetX += (transform.right * Time.deltaTime * newTurningSpeed).x;
                 direction = 1;
             }
             if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
             {
-                targetX -= (transform.right * Time.deltaTime * turningSpeed).x;
+                targetX -= (transform.right * Time.deltaTime * newTurningSpeed).x;
                 direction = 2;
             }
         }

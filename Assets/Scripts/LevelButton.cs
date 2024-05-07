@@ -7,8 +7,8 @@ using UnityEngine.UI;
 public class LevelButton : MonoBehaviour
 {
     // Constants
-    const float INITIAL_INFINITE_LEVEL_SLIDING_SPEED = 20f;
-    const float INITIAL_INFINITE_LEVEL_TURNING_SPEED = 15f;
+    const float INITIAL_INFINITE_LEVEL_SLIDING_SPEED = 15f;
+    const float INITIAL_INFINITE_LEVEL_TURNING_SPEED = 10f;
 
     // Variables
     public int levelIndex;

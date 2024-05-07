@@ -10,7 +10,7 @@ public class Deer : MonoBehaviour
     [SerializeField] private bool jumpToLeft;
     [SerializeField] private float forceUp;
     [SerializeField] private float forceLeft;
-    [SerializeField] private bool isJumpingDeer;
+    public bool isJumpingDeer;
     private bool jumped = false;
 
     

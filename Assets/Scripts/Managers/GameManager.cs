@@ -12,7 +12,8 @@ public class GameManager : MonoBehaviour
 
     [SerializeField] private Sprite selectedButtonSprite, unselectedButtonSprite;
     [SerializeField] private Image levelsButton;
-    
+
+    [SerializeField] private GameObject creditsPopUp;
     [SerializeField] private GameObject gameOverPopUp;
     [SerializeField] private GameObject completeLevelPopUp;
     [SerializeField] private TextMeshProUGUI levelCompletedLabel;
@@ -88,8 +89,20 @@ public class GameManager : MonoBehaviour
     {
         StartCoroutine(DoFadeIn(gameOverPopUp.GetComponent<CanvasGroup>()));
     }
-
     
+    
+    public void ShowCreditsPopUp()
+    {
+        StartCoroutine(DoFadeIn(creditsPopUp.GetComponent<CanvasGroup>()));
+    }
+
+
+    public void HideCreditsPopUp()
+    {
+        StartCoroutine(DoFadeOut(creditsPopUp.GetComponent<CanvasGroup>()));
+    }
+    
+
     public void ShowCompleteLevelPopUp()
     {
         levelCompletedLabel.text = PlayerPrefsManager.lastLevelLoaded.ToString();

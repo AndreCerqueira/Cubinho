@@ -36,7 +36,7 @@ public class MapGenerator : MonoBehaviour
         {
             if (chunkPrefabs[i].GetComponent<Chunk>().difficulty == nextChunkDifficulty)
             {
-                if (!chunkPrefabs[i].GetComponent<Chunk>().isAfter600m || (chunkPrefabs[i].GetComponent<Chunk>().isAfter600m && currentScore >= 600))
+                if (!chunkPrefabs[i].GetComponent<Chunk>().isAfter600m || (chunkPrefabs[i].GetComponent<Chunk>().isAfter600m && currentScore >= 400)) // 600 changed to 400
                     validChunkIndices.Add(i);
             }
         }
