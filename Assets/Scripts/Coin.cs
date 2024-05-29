@@ -36,9 +36,32 @@ public class Coin : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
+            // Get the audio source in this and play the coin sound
+            if (!AudioManager.instance.isSfxActivated)
+            {
+                Debug.Log("Coin collected");
+                PlayerPrefsManager.runCoins++;
+                Destroy(gameObject);
+                return;
+            }
+            
+            AudioSource audioSource = GetComponent<AudioSource>();
+            audioSource.Play();
+
             Debug.Log("Coin collected");
             PlayerPrefsManager.runCoins++;
-            Destroy(gameObject);
+
+            // Start coroutine to wait for the sound to finish
+            StartCoroutine(WaitForSoundToFinish(audioSource));
         }
+    }
+
+    private IEnumerator WaitForSoundToFinish(AudioSource audioSource)
+    {
+        // Wait for the duration of the audio clip
+        yield return new WaitForSeconds(audioSource.clip.length + 0.1f);
+
+        // Destroy the game object after the sound has finished playing
+        Destroy(gameObject);
     }
 }

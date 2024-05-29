@@ -25,6 +25,18 @@ public static class PlayerPrefsManager
         set { PlayerPrefs.SetInt("qualitySettings", value); }
     }
 
+    public static bool isSfxActivated
+    {
+        get { return PlayerPrefs.GetInt("isSfxActivated") == 0 ? false : true; }
+        set { PlayerPrefs.SetInt("isSfxActivated", (value == false) ? 0 : 1); }
+    }
+
+    public static bool isMusicActivated
+    {
+        get { return PlayerPrefs.GetInt("isMusicActivated") == 0 ? false : true; }
+        set { PlayerPrefs.SetInt("isMusicActivated", (value == false) ? 0 : 1); }
+    }
+
     public static bool isGuest
     {
         get { return PlayerPrefs.GetInt("isGuest") == 0 ? false : true; }
